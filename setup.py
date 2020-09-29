@@ -149,6 +149,11 @@ def main():
     if sys.platform.startswith('linux') and not x64:
         cmake_args.append("-DCMAKE_CXX_FLAGS=-U__STRICT_ANSI__")
 
+    if 'CMAKE_ARGS' in os.environ:
+        import shlex
+        cmake_args.extend(shlex.split(os.environ['CMAKE_ARGS']))
+        del shlex
+
     # ABI config variables are introduced in PEP 425
     if sys.version_info[:2] < (3, 2):
         import warnings
@@ -263,7 +268,7 @@ class RearrangeCMakeOutput(object):
 
         # 'relpath'/'reldir' = relative to CMAKE_INSTALL_DIR/cmake_install_dir
         # 'path'/'dir' = relative to sourcetree root
-        cmake_install_dir = os.path.join(cls._setuptools_wrap.CMAKE_INSTALL_DIR,
+        cmake_install_dir = os.path.join(cls._setuptools_wrap.CMAKE_INSTALL_DIR(),
                                          cmake_install_reldir)
         install_relpaths = [os.path.relpath(p, cmake_install_dir) for p in install_paths]
         fslash_install_relpaths = [p.replace(os.path.sep, '/') for p in install_relpaths]
